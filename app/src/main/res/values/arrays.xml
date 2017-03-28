@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="serialport_name">
+        <item>/dev/ttySAC1</item>
+        <item>/dev/ttyMT0</item>
+        <item>/dev/ttySAC0</item>
+        <item>/dev/ttySAC2</item>
+        <item>/dev/ttySAC3</item>
+        <item>/dev/ttyUSB0</item>
+        <item>/dev/ttyUSB1</item>
+        <item>/dev/ttyUSB2</item>
+        <item>/dev/ttyUSB3</item>
+    </string-array>
+
+    <string-array name="baudrates_value">
+        <item>1200</item>
+        <item>1800</item>
+        <item>2400</item>
+        <item>4800</item>
+        <item>9600</item>
+        <item>19200</item>
+        <item>38400</item>
+        <item>57600</item>
+        <item>115200</item>
+        <item>230400</item>
+        <item>460800</item>
+        <item>500000</item>
+        <item>576000</item>
+        <item>921600</item>
+        <item>1000000</item>
+        <item>1152000</item>
+        <item>1500000</item>
+        <item>2000000</item>
+        <item>2500000</item>
+        <item>3000000</item>
+        <item>3500000</item>
+        <item>4000000</item>
+    </string-array>
+
+    <string-array name="cmd">
+        <item> detection model,0x1B 0x2B</item>
+        <item>horizontal tab,0x09</item>
+        <item>newline,0x0A</item>
+        <item>Print this store content,0x0D</item>
+        <item>initialize the printer,0x1B 0x40</item>
+        <item>Allow underline print,0x1C 0x2D 0x01</item>
+        <item>ban underline print,1C 0x2D 0x00</item>
+        <item>Allow bold print,0x1B 0x45 0x01</item>
+        <item>ban bold print,0x1B 0x45 0x00</item>
+        <item>Select the font: ASCII (12 * 24) characters (24 * 24),0x1B 0x4D 0x00</item>
+        <item>Select the font: ASCII (8 * 16) characters (16 * 16),0x1B 0x4D 0x01</item>
+        <item>characters correctly: no amplification,0x1D 0x21 0x00</item>
+        <item>2-fold character: Portrait zoom,0x1D 0x21 0x01</item>
+        <item>2 times the width of the character: horizontal zoom,0x1D 0x21 0x10</item>
+        <item>2 times the overall character amplification,1D 21 11</item>
+        <item>Left,0x1B 0x61 0x00</item>
+        <item>Align,0x1B 0x61 0x01</item>
+        <item>ranks right alignment,0x1B 0x61 0x02</item>
+        <item>page feed,0x0C</item>
+    </string-array>
+</resources>

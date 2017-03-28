@@ -10,16 +10,32 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
     }
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+        debug {
+            debuggable true
         }
     }
     sourceSets {
         main {
-            jni.srcDirs = ["libs"]
+            // Fixed Issue : "android studio java.lang.unsatisfiedlinkerror: couldn't load find library returned null"
+            // Cause : For android studio : The JNI files should be placed in the /src/main/jniLibs folder.
+            // Fix : Mapping the jniLibs 's source Directories with Lib's folder
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'x86', 'armeabi-v7a', 'mips', 'armeabi'
+            universalApk false
         }
     }
 }
@@ -34,7 +50,7 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:support-v4:25.3.0'
-    compile files('libs/core-3.2.1.jar')
     compile files('libs/smartdevicesdk.jar')
     compile files('libs/zbar.jar')
+    compile files('libs/core-3.2.1.jar')
 }
