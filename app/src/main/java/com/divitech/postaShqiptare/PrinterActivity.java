@@ -1,4 +1,4 @@
-package com.smartdevicesdk.testdpc900;
+package com.divitech.postaShqiptare;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;

@@ -1,4 +1,4 @@
-package com.smartdevicesdk.testdpc900;
+package com.divitech.postaShqiptare;
 
 /**
  * Copyright DIVITECH ICT, 2017.
