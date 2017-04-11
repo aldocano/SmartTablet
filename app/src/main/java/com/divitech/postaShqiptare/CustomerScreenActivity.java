@@ -11,8 +11,6 @@ import android.os.SystemClock;
 import android.serialport.api.MyApp;
 import android.serialport.api.SerialPortFinder;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -38,6 +36,9 @@ public class CustomerScreenActivity extends Activity implements View.OnClickList
     Button button_open;
     CheckBox checkBox1;
     ThreadAuto _thAuto;
+    int[] colorArray = new int[]{Color.BLUE, Color.GREEN, Color.BLUE,
+            Color.YELLOW, Color.WHITE};
+    int colorIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,11 +59,11 @@ public class CustomerScreenActivity extends Activity implements View.OnClickList
         Button button_rgb565 = (Button) findViewById(R.id.button_rgb565);
         button_rgb565.setOnClickListener(this);
 
-        Button button_rgb565_location = (Button) findViewById(R.id.button_rgb565_location);
-        button_rgb565_location.setOnClickListener(this);
-
-        Button button_updatelogo = (Button) findViewById(R.id.button_updatelogo);
-        button_updatelogo.setOnClickListener(this);
+//        Button button_rgb565_location = (Button) findViewById(R.id.button_rgb565_location);
+//        button_rgb565_location.setOnClickListener(this);
+//
+//        Button button_updatelogo = (Button) findViewById(R.id.button_updatelogo);
+//        button_updatelogo.setOnClickListener(this);
 
         checkBox1 = (CheckBox) findViewById(R.id.checkBox1);
         checkBox1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -84,7 +85,7 @@ public class CustomerScreenActivity extends Activity implements View.OnClickList
 
         imageView1 = (ImageView) findViewById(R.id.imageView1);
 
-        spinner_name = (Spinner) findViewById(R.id.spinner_serialport_name);
+        /*spinner_name = (Spinner) findViewById(R.id.spinner_serialport_name);
         spinner_name.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
@@ -110,16 +111,16 @@ public class CustomerScreenActivity extends Activity implements View.OnClickList
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
-        });
+        });*/
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, entries);
-        spinner_name.setAdapter(adapter);
-        final String[] baudValues = getResources().getStringArray(
-                R.array.baudrates_value);
-        adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, baudValues);
-        spinner_baud.setAdapter(adapter);
+//        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+//                android.R.layout.simple_spinner_item, entries);
+//        spinner_name.setAdapter(adapter);
+//        final String[] baudValues = getResources().getStringArray(
+//                R.array.baudrates_value);
+//        adapter = new ArrayAdapter<String>(this,
+//                android.R.layout.simple_spinner_item, baudValues);
+//        spinner_baud.setAdapter(adapter);
     }
 
     @Override
@@ -183,34 +184,30 @@ public class CustomerScreenActivity extends Activity implements View.OnClickList
                 break;
             case R.id.button_rgb565:
                 Bitmap bmRGB565 = BitmapFactory.decodeResource(getResources(),
-                        R.drawable.posta_logo);
+                        R.drawable.posta_shqiptare);
                 if (cs.ShowRGB565Image(bmRGB565)) {
                     imageView1.setImageBitmap(bmRGB565);
                 }
                 break;
-            case R.id.button_rgb565_location:
+/*            case R.id.button_rgb565_location:
                 bmRGB565 = BitmapFactory.decodeResource(getResources(),
-                        R.drawable.zkc);
+                        R.mipmap.ic_launcher_round);
                 boolean flg = cs.ShowRGB565ImageCenter(bmRGB565);
                 if (flg) {
                     imageView1.setImageBitmap(bmRGB565);
                 }
                 break;
-            case R.id.button_updatelogo:
+            *//*case R.id.button_updatelogo:
                 bmRGB565 = BitmapFactory.decodeResource(getResources(),
                         R.drawable.fj);
                 if (cs.UpdateLogo(bmRGB565)) {
                     imageView1.setImageBitmap(bmRGB565);
-                }
-                break;
+                }*//*
+                break;*/
             default:
                 break;
         }
     }
-
-    int[] colorArray = new int[] { Color.BLUE, Color.GREEN, Color.BLUE,
-            Color.YELLOW, Color.WHITE };
-    int colorIndex = 0;
 
     private Bitmap getBitmap() {
         Bitmap bitmap = Bitmap.createBitmap(480, 272, Bitmap.Config.RGB_565);

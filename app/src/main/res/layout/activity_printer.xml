@@ -40,11 +40,66 @@
 
         </LinearLayout>
 
-        <Button android:id="@+id/btnopendevice" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/opendevice" /><Button android:id="@+id/btnOpenPic" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/openpic" />
+        <Button
+            android:id="@+id/printReceipts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fatura" />
 
-        <Button android:id="@+id/btnWordToPic" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/wordtopic" /><Button android:id="@+id/btnQrCode" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/qrcode" /><Button android:id="@+id/btnBarCode" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/barcode" />
+        <Button
+            android:id="@+id/btnopendevice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/opendevice" />
 
-        <Button android:id="@+id/btnPrintPic" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/printpic" /><Button android:id="@+id/btnPrint" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/print" /><Button android:id="@+id/btnUnicode" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/str_printunicode" /><CheckBox android:id="@+id/checkBoxTimer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="false" android:text="@string/timing" />
+        <Button
+            android:id="@+id/btnOpenPic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/openpic" />
+
+        <Button
+            android:id="@+id/btnWordToPic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/wordtopic" />
+
+        <Button
+            android:id="@+id/btnQrCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/qrcode" />
+
+        <Button
+            android:id="@+id/btnBarCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/barcode" />
+
+        <Button
+            android:id="@+id/btnPrintPic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/printpic" />
+
+        <Button
+            android:id="@+id/btnPrint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/print" />
+
+        <Button
+            android:id="@+id/btnUnicode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/str_printunicode" />
+
+        <CheckBox
+            android:id="@+id/checkBoxTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="@string/timing" />
 
         <ScrollView
             android:id="@+id/scrollView1"

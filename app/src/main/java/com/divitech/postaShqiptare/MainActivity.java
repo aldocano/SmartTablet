@@ -5,13 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.serialport.api.SerialPortParam;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
+import com.smartdevicesdk.cscreen.CustomerScreenHelperPC900;
 import com.smartdevicesdk.device.DeviceInfo;
 import com.smartdevicesdk.device.DeviceManage;
 import com.smartdevicesdk.ui.SystemControl;
@@ -23,17 +22,22 @@ import java.util.List;
 
 public class MainActivity extends Activity {
     private static final String TAG = null;
-    private ListView listView;
-    List<HashMap<String, String>> data = new ArrayList<HashMap<String, String>>();
-
     public static DeviceInfo devInfo = DeviceManage.getDevInfo("PC900");
+    List<HashMap<String, String>> data = new ArrayList<HashMap<String, String>>();
+    CustomerScreenHelperPC900 cs;
+    String device = "/dev/ttyMT0";// MainActivity.devInfo.getPrinterSerialport();
+    int baudrate = 115200;
+    Button buttonScreen, buttonPrint, buttonWeb;
+    private ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getOverflowMenu();
-        listView = (ListView) findViewById(R.id.listView1);
+/*        listView = (ListView) findViewById(R.id.listView1);
+
+
         if (devInfo != null) {
             // 生成SimpleAdapter适配器对象
             SimpleAdapter mySimpleAdapter = new SimpleAdapter(this,
@@ -53,31 +57,48 @@ public class MainActivity extends Activity {
                 if (titleStr.equals("printer")){
                     intent.setClass(MainActivity.this, PrinterActivity.class);
                     startActivity(intent);
-                } else if (titleStr.equals("camerascanner")){
-                    intent.setClass(MainActivity.this, CameraScannerActivity.class);
-                    startActivity(intent);
-                } else if (titleStr.equals("psam")) {
-                    intent.setClass(MainActivity.this, PSAMActivity.class);
-                    startActivity(intent);
-                } else if (titleStr.equals("magneticcard")) {
-                    intent.setClass(MainActivity.this, MagneticCardActivity.class);
-                    startActivity(intent);
-                } else if (titleStr.equals("changeserialport")) {
-                    intent.setClass(MainActivity.this, ChangeSerialportActivity.class);
-                    startActivity(intent);
-                } else if (titleStr.equals("idcard")) {
-                    intent.setClass(MainActivity.this, IDCardActivity.class);
-                    startActivity(intent);
-                }else if(titleStr.equals("serialport")){
-                    intent.setClass(MainActivity.this, SerialPortActivity.class);
-                    startActivity(intent);
                 }else if(titleStr.equals("cscreen")){
+                    intent.setClass(MainActivity.this, CustomerScreenActivity.class);
+                    startActivity(intent);
+                }else {
                     intent.setClass(MainActivity.this, CustomerScreenActivity.class);
                     startActivity(intent);
                 }
             }
+        });*/
+
+        buttonScreen = (Button) findViewById(R.id.buttonScreen);
+        buttonScreen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                intent.setClass(MainActivity.this, CustomerScreenActivity.class);
+                startActivity(intent);
+            }
         });
 
+        buttonPrint = (Button) findViewById(R.id.buttonPrint);
+        buttonPrint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                intent.setClass(MainActivity.this, PrinterActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        buttonWeb = (Button) findViewById(R.id.buttonWeb);
+        buttonWeb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                intent.setClass(MainActivity.this, Webview.class);
+                startActivity(intent);
+            }
+        });
 
         SerialPortParam.Path="/dev/ttyMT0";////ttyS1
         SerialPortParam.Baudrate=115200;
@@ -103,11 +124,18 @@ public class MainActivity extends Activity {
 		 * Before all function calls, you must turn on the device
 		 */
         devInfo.openModel();
+        cs = new CustomerScreenHelperPC900(device, baudrate);
+
+        if (cs.open()) {
+            cs.openBackLight((byte) 0x01);
+        }
         super.onResume();
     }
 
     @Override
     protected void onDestroy() {
+        cs.openBackLight((byte) 0x00);
+        cs.close();
         devInfo.closeModel();
         super.onDestroy();
     }
@@ -118,20 +146,6 @@ public class MainActivity extends Activity {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_about) {
-            Intent intent=new Intent();
-            intent.setClass(MainActivity.this, DeviceInfoActivity.class);
-            startActivity(intent);
-        }else if(id==R.id.action_keypress){
-            Intent intent=new Intent();
-            intent.setClass(MainActivity.this, KeyPressActivity.class);
-            startActivity(intent);
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {

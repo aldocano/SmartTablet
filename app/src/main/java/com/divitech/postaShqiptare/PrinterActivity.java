@@ -58,20 +58,21 @@ import java.util.Map;
  */
 
 public class PrinterActivity extends Activity implements CompoundButton.OnCheckedChangeListener {
+    protected static final String TAG = "PrintDemo";
+    private static final int REQUEST_EX = 1;
     PrinterClassSerialPort printerClass = null;
     List<Map<String, String>> listData = new ArrayList<Map<String, String>>();
-    private static final int REQUEST_EX = 1;
-    protected static final String TAG = "PrintDemo";
-
-    private int cutTimes = 1;
-
-    private Thread autoprint_Thread;
     boolean isPrint = true;
     int times = 1500;// Automatic print time interval
-
+    String thread = "readThread";
+    String text = "abckefghijklmnopkrstuvwsyz1234567890打印测试\r\n";
+    long startTimes = 0;
+    long endTimes = 0;
+    long timeSpace = 0;
+    private int cutTimes = 1;
+    private Thread autoprint_Thread;
     private ImageView iv = null;
     private boolean printFlag;
-
     private String picPath = "";
     private Bitmap btMap = null;
     private Button btnQrCode = null;
@@ -82,27 +83,114 @@ public class PrinterActivity extends Activity implements CompoundButton.OnChecke
     private Button btnPrint = null;
     private Button btnOpenPic = null;
     private Button btnPrintPic = null;
-
+    private Button fatura = null;
     private TextView textViewState = null;
     private EditText et_input = null;
     private CheckBox checkBoxAuto = null;
-
     private Spinner spinner_device;
     private Spinner spinner_baudrate;
-
-    String thread = "readThread";
-    String text = "abckefghijklmnopkrstuvwsyz1234567890打印测试\r\n";
-
     private String device = "/dev/ttyMT0";
     private int baudrate = 115200;// 38400
+    private final BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            final String action = intent.getAction();
+            if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                printerClass.device = device;
+                printerClass.baudrate = baudrate;
+                printerClass.open();
+            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                printerClass.close();
 
-    long startTimes =  0;
-    long endTimes = 0;
-    long timeSpace = 0;
+            }
+        }
+
+    };
     /**
      * 允许/禁止打印标记
      */
     private boolean close_printer = true;
+    private Handler hanler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 0:
+                    btnPrintPic.setEnabled(true);
+                    btnOpenPic.setEnabled(true);
+                    btnBarCode.setEnabled(true);
+                    btnWordToPic.setEnabled(true);
+                    btnQrCode.setEnabled(true);
+                    btnPrint.setEnabled(true);
+                    break;
+                case 11:
+                    btnPrintPic.setEnabled(false);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    };
+
+    /**
+     * 调整图片大小以适应打印机图片大小
+     *
+     * @param bitmap
+     * @param w
+     * @param h
+     * @return
+     */
+    public static Bitmap resizeImage(Bitmap bitmap, int w, int h) {
+        Bitmap BitmapOrg = bitmap;
+        int width = BitmapOrg.getWidth();
+        int height = BitmapOrg.getHeight();
+        int newWidth = w;
+        int newHeight = h;
+
+        if (width >= newWidth) {
+            float scaleWidth = ((float) newWidth) / width;
+            Matrix matrix = new Matrix();
+            matrix.postScale(scaleWidth, scaleWidth);
+            Bitmap resizedBitmap = Bitmap.createBitmap(BitmapOrg, 0, 0, width,
+                    height, matrix, true);
+            return resizedBitmap;
+        } else {
+            Bitmap bitmap2 = Bitmap.createBitmap(newWidth, newHeight,
+                    bitmap.getConfig());
+            Canvas canvas = new Canvas(bitmap2);
+            canvas.drawColor(Color.WHITE);
+
+            canvas.drawBitmap(BitmapOrg, (newWidth - width) / 2, 0, null);
+
+            return bitmap2;
+        }
+    }
+
+    /**
+     * 字符串转unicode编码的字节数组
+     *
+     * @param s
+     * @return
+     */
+    static byte[] string2Unicode(String s) {
+        try {
+            byte[] bytes = s.getBytes("unicode");
+            byte[] bt = new byte[bytes.length - 2];
+            for (int i = 2, j = 0; i < bytes.length - 1; i += 2, j += 2) {
+                bt[j] = (byte) (bytes[i + 1] & 0xff);
+                bt[j + 1] = (byte) (bytes[i] & 0xff);
+            }
+            return bt;
+        } catch (Exception e) {
+            try {
+                byte[] bt = s.getBytes("GBK");
+                return bt;
+            } catch (UnsupportedEncodingException e1) {
+                Log.e(TAG, e.getMessage());
+                return null;
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,7 +202,7 @@ public class PrinterActivity extends Activity implements CompoundButton.OnChecke
         et_input = (EditText) findViewById(R.id.editText1);
         btnUnicode = (Button) findViewById(R.id.btnUnicode);
         btnPrint = (Button) findViewById(R.id.btnPrint);
-
+        fatura = (Button) findViewById(R.id.printReceipts);
         et_input.setText(text);
 
         btnOpenPic = (Button) findViewById(R.id.btnOpenPic);
@@ -172,6 +260,12 @@ public class PrinterActivity extends Activity implements CompoundButton.OnChecke
                     }
 
                 });
+        fatura.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                printerClass.printText(GetPrintStr());
+            }
+        });
 
         btnOpenDevice.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -234,6 +328,8 @@ public class PrinterActivity extends Activity implements CompoundButton.OnChecke
             });
         }
 
+
+
         if (btnBarCode != null) {
             btnBarCode.setOnClickListener(new View.OnClickListener() {
 
@@ -242,7 +338,7 @@ public class PrinterActivity extends Activity implements CompoundButton.OnChecke
                     String message = "431D0E7D9CC19BC1FDAB7";
                     if (message.getBytes().length > message.length()) {
                         Toast.makeText(PrinterActivity.this, "create error",
-                                2000).show();
+                                Toast.LENGTH_SHORT).show();
                         return;
                     }
                     if (message.length() > 0) {
@@ -312,7 +408,6 @@ public class PrinterActivity extends Activity implements CompoundButton.OnChecke
             }
             if (btnPrintPic != null) {
                 btnPrintPic.setOnClickListener(new View.OnClickListener() {
-
                     @Override
                     public void onClick(View v) {
                         new Thread() {
@@ -328,7 +423,6 @@ public class PrinterActivity extends Activity implements CompoundButton.OnChecke
                             }
                         }.start();
                         return;
-
                     }
                 });
             }
@@ -497,76 +591,6 @@ public class PrinterActivity extends Activity implements CompoundButton.OnChecke
         super.onDestroy();
     }
 
-    private final BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(final Context context, final Intent intent) {
-            final String action = intent.getAction();
-            if (Intent.ACTION_SCREEN_ON.equals(action)) {
-                printerClass.device = device;
-                printerClass.baudrate = baudrate;
-                printerClass.open();
-            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                printerClass.close();
-
-            }
-        }
-
-    };
-
-    private Handler hanler = new Handler() {
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 0:
-                    btnPrintPic.setEnabled(true);
-                    btnOpenPic.setEnabled(true);
-                    btnBarCode.setEnabled(true);
-                    btnWordToPic.setEnabled(true);
-                    btnQrCode.setEnabled(true);
-                    btnPrint.setEnabled(true);
-                    break;
-                case 11:
-                    btnPrintPic.setEnabled(false);
-                    break;
-
-                default:
-                    break;
-            }
-        }
-    };
-
-    /**
-     * 调整图片大小以适应打印机图片大小
-     * @param bitmap
-     * @param w
-     * @param h
-     * @return
-     */
-    public static Bitmap resizeImage(Bitmap bitmap, int w, int h) {
-        Bitmap BitmapOrg = bitmap;
-        int width = BitmapOrg.getWidth();
-        int height = BitmapOrg.getHeight();
-        int newWidth = w;
-        int newHeight = h;
-
-        if (width >= newWidth) {
-            float scaleWidth = ((float) newWidth) / width;
-            Matrix matrix = new Matrix();
-            matrix.postScale(scaleWidth, scaleWidth);
-            Bitmap resizedBitmap = Bitmap.createBitmap(BitmapOrg, 0, 0, width,
-                    height, matrix, true);
-            return resizedBitmap;
-        } else {
-            Bitmap bitmap2 = Bitmap.createBitmap(newWidth, newHeight,
-                    bitmap.getConfig());
-            Canvas canvas = new Canvas(bitmap2);
-            canvas.drawColor(Color.WHITE);
-
-            canvas.drawBitmap(BitmapOrg, (newWidth - width) / 2, 0, null);
-
-            return bitmap2;
-        }
-    }
-
     /**
      * 再次进入当前页面获取上一页面传递的值
      */
@@ -592,31 +616,6 @@ public class PrinterActivity extends Activity implements CompoundButton.OnChecke
             cursor.close();
         }
 
-    }
-
-    /**
-     * 字符串转unicode编码的字节数组
-     * @param s
-     * @return
-     */
-    static byte[] string2Unicode(String s) {
-        try {
-            byte[] bytes = s.getBytes("unicode");
-            byte[] bt = new byte[bytes.length - 2];
-            for (int i = 2, j = 0; i < bytes.length - 1; i += 2, j += 2) {
-                bt[j] = (byte) (bytes[i + 1] & 0xff);
-                bt[j + 1] = (byte) (bytes[i] & 0xff);
-            }
-            return bt;
-        } catch (Exception e) {
-            try {
-                byte[] bt = s.getBytes("GBK");
-                return bt;
-            } catch (UnsupportedEncodingException e1) {
-                Log.e(TAG, e.getMessage());
-                return null;
-            }
-        }
     }
 
     /**
@@ -686,19 +685,23 @@ public class PrinterActivity extends Activity implements CompoundButton.OnChecke
         String date = sDateFormat.format(new java.util.Date());
         StringBuilder sb = new StringBuilder();
 
-        String tou = "四海一家（益田假日广场店）";
-        String address = "南山区深南大道9028号益田假日广场3楼东侧（1号线世界之窗站A出口）";
+        String titulli = "Posta Shqiptare";
+        String kuponTatimor = "KUPON TATIMOR";
+        String addresa = "Terminal Center, kthesa e Kamzes）";
         String saleID = "2016930233330";
-        String item = "项目";
+        String item = "Produkti";
         Double price = 25.00;
         int count = 10;
         Double total = 0.00;
         Double fukuan = 500.00;
 
-        sb.append("   " + tou + "     \n");
-        sb.append("日期:" + date + "  " + "\n单号:" + saleID + "\n");
+
+        sb.append("   " + titulli + "     \n");
+        sb.append("   " + kuponTatimor + "     \n");
+        sb.append("Fatura nr:" + saleID + "\n");
         sb.append("******************************\n");
-        sb.append("项目" + "\t\t" + "数量" + "\t" + "单价" + "\t" + "小计" + "\n");
+
+        sb.append("Produkti" + "\t\t" + "Sasia" + "\t" + "\t" + "Cmimi" + "\n");
         for (int i = 0; i < count; i++) {
             Double xiaoji = (i + 1) * price;
             sb.append(item + (i + 1) + "\t\t" + (i + 1) + "\t" + price + "\t"
@@ -710,19 +713,22 @@ public class PrinterActivity extends Activity implements CompoundButton.OnChecke
         }
 
         sb.append("******************************\n");
-        sb.append("数量: " + count + " 合计:   " + total + "\n");
-        sb.append("付款: 现金" + "    " + fukuan + "\n");
-        sb.append("现金找零:" + "   " + (fukuan - total) + "\n");
+        sb.append("Sasia: " + count + "\n");
+        sb.append("Totali:   " + total + "\n");
+        sb.append("Pagesa:" + "    " + fukuan + "\n");
+        sb.append("Kusuri:" + "   " + (fukuan - total) + "\n");
         sb.append("******************************\n");
-        sb.append("地址：" + address + "\n");
-        sb.append("电话：0755-89829988\n");
-
-        sb.append("******谢谢惠顾欢迎下次光临******\r\n\n");
+        sb.append("Adresa：" + addresa + "\n");
+        sb.append("Telefon：355 4 2222 315\n");
+        sb.append("******************************\n");
+        sb.append("Kuponi Tatimor nr:" + saleID + "\n");
+        sb.append(date + "  " + "\n");
+        sb.append("******Ju faleminderit******\r\n\n");
         return sb.toString();
     }
 
-    static {
-        System.loadLibrary("serial_port");
-    }
+//    static {
+//        System.loadLibrary("serial_port");
+//    }
 
 }
